@@ -9,12 +9,17 @@ export class UserService {
         private readonly userRepo: typeof User,
     ) {}
 
-    async findByEmail(email: string): Promise<UserDto> {
+    async findByEmail(email: string): Promise<User> {
         const user = await this.userRepo.findOne({where: { email }});
-        return this.toDto(user);
+        return user
     }
 
-    async newUser(dto: UserDto) {
+    async findByUUID(uuid: string): Promise<User> {
+        const user = await this.userRepo.findByPk(uuid);
+        return user
+    }
+
+    async create(dto: UserDto) {
         const user = new User();
 
         user.firstname = dto.firstname;
@@ -22,7 +27,7 @@ export class UserService {
         user.password = dto.password;
         user.email = dto.email;
 
-        await user.save();
+        return this.toDto(await user.save());
     }
 
     private toDto(user: User): UserDto {

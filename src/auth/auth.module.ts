@@ -6,6 +6,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { databaseProviders } from 'src/providers/database.providers';
 import { usersProviders } from 'src/providers/users.providers';
+import { BlacklistService } from 'src/blacklist/blacklist.service';
 
 @Module({
     imports: [
@@ -20,9 +21,10 @@ import { usersProviders } from 'src/providers/users.providers';
         UserService,
         AuthService,
         JwtService,
+        BlacklistService,
         ...databaseProviders,
         ...usersProviders,
     ],
-    controllers: [AuthController]
+    controllers: [AuthController],
 })
 export class AuthModule {}

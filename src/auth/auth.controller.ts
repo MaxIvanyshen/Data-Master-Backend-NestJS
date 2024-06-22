@@ -1,12 +1,25 @@
 import { AuthService } from './auth.service';
-import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
 
     constructor(private readonly authService: AuthService) {}
+
+    @Post('register')
+    async register(@Body() createUserDto: UserDto, @Res() res: Response) {
+        try {
+            const user = await this.authService.register(createUserDto);
+            const { accessToken, refreshToken } = await this.authService.login({ email: user.email, password: createUserDto.password });
+            res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 14 * 24 * 60 * 60 * 1000 }); // 14 days
+            res.status(HttpStatus.CREATED).json({ accessToken });
+        } catch (error) {
+            res.status(HttpStatus.CONFLICT).json({ message: error.message });
+        }
+    }
 
     @Post('login')
     async login(@Body() loginDto: LoginUserDto, @Res() res: Response) {
@@ -34,5 +47,16 @@ export class AuthController {
         } catch (error) {
             res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Invalid refresh token' });
         }
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('logout')
+    async logout(@Req() req: Request) {
+        return this.authService.logout(this.extractTokenFromHeader(req))
+    }
+
+    private extractTokenFromHeader(request: Request): string | undefined {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
     }
 }

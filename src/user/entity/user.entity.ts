@@ -32,6 +32,12 @@ export class User extends Model {
     })
     email: string;
 
+    @Column
+    accessToken: string
+
+    @Column
+    refreshToken: string
+
     @BeforeSave
     static async hashPassword(user: User) {
         if (user.changed('password')) {
