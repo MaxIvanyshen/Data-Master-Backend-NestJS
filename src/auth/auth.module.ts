@@ -7,6 +7,7 @@ import { jwtConstants } from './constants';
 import { databaseProviders } from 'src/providers/database.providers';
 import { usersProviders } from 'src/providers/users.providers';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
+import { TokenService } from 'src/token/token.service';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { BlacklistService } from 'src/blacklist/blacklist.service';
         AuthService,
         JwtService,
         BlacklistService,
+        TokenService,
         ...databaseProviders,
         ...usersProviders,
     ],

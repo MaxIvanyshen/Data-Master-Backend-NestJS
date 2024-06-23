@@ -9,29 +9,27 @@ import { jwtConstants } from './constants';
 import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
+import { TokenService } from 'src/token/token.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-      private jwtService: JwtService,
       private usersService: UserService,
       private blacklistService: BlacklistService,
+      private tokenService: TokenService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = await this.tokenService.extractTokenFromHeader(request);
     if (!token) {
       throw new UnauthorizedException();
     }
     try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: jwtConstants.secret
-        }
-      );
-      const uuid = payload.sub;
+      const uuid = await this.tokenService.getUUID(token);
+      if(!uuid) {
+          throw new UnauthorizedException('Invalid refresh token')
+      }
       const user = await this.usersService.findByUUID(uuid);
       if(!user || user.accessToken != token ||
          await this.blacklistService.isTokenBlacklisted(user.accessToken)) {
@@ -43,8 +41,4 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
-  }
 }

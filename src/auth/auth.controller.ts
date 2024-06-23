@@ -1,13 +1,17 @@
 import { AuthService } from './auth.service';
 import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { TokenService } from 'src/token/token.service';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
 
-    constructor(private readonly authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly tokenService: TokenService,
+    ) {}
 
     @Post('register')
     async register(@Body() createUserDto: UserDto, @Res() res: Response) {
@@ -52,11 +56,6 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('logout')
     async logout(@Req() req: Request) {
-        return this.authService.logout(this.extractTokenFromHeader(req))
-    }
-
-    private extractTokenFromHeader(request: Request): string | undefined {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
+        return this.authService.logout(await this.tokenService.extractTokenFromHeader(req))
     }
 }
