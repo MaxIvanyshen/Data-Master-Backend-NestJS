@@ -1,0 +1,100 @@
+import { Client } from 'pg';
+import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
+import { SchemaConverter } from "../sqlTools/sqlSchemaConverter";
+import { DbData } from 'src/db-data/entity/db-data.entity';
+import { SelectRequest } from 'src/db-requests/selectRequest';
+import { InternalServerErrorException } from '@nestjs/common';
+
+export class PostgresDAO {
+    public readonly OK = 0;
+    public readonly ERROR = 1;
+
+    private data: any = null;
+    private client: any = null;
+
+    private schema: any = null;
+
+    public async connectToDB(dbData: DbData): Promise<number> {
+        this.client = new Client(dbData.data["connection_data"]);
+        let status: number = 0;
+        this.client.connect((err: any) => {
+            if (err) {
+                status = this.ERROR;
+                throw err;
+            };
+        });
+        return status;
+    }
+
+    /*
+    public async write(data: any): Promise<number> {
+
+        if(this.schema == null)
+            await this.getSchema();
+
+        let status = this.OK;
+        let rowsNumberQuery = `SELECT COUNT(*) AS "count" FROM ` + data.table + ``;
+        let rowsNumberResp = await this.client.query(rowsNumberQuery);
+        let rowsNumber = rowsNumberResp.rows[0].count;
+        data["id"] = Number(rowsNumber) + 1;
+        await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)})
+
+        return status; 
+    }
+    */
+
+    public async findOne(db: DbData, req: SelectRequest): Promise<any> {
+        try {
+            await this.connectToDB(db);
+        } catch(e) {
+            throw new InternalServerErrorException("couldn't connect to database");
+        }
+        await this.getSchema(req.table);
+
+        const result = await this.client.query(SqlQueryConstructor.makeSelectionQueryStr(req.data, req.table));
+        return result.rows[0];
+    } 
+    /*
+
+    public async findMany(query: any): Promise<any> {
+        if(this.schema == null) 
+            await this.getSchema();
+        let queryStr = SqlQueryConstructor.makeSelectionQueryStr(query, this.data.table);
+        const result = await this.client.query(queryStr);
+        return result.rows;
+    }
+
+    public async delete(query: any): Promise<number> {
+        if(this.schema == null)
+            await this.getSchema();
+
+        let status = this.OK;
+        await this.client.query(SqlQueryConstructor.makeDeletionQueryStr(query, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)});
+
+        return status;
+    }
+
+    j
+    public async update(query: any, data: any): Promise<number> {
+        if(this.schema == null)
+            await this.getSchema();
+
+        let status = this.OK;
+        await this.client.query(SqlQueryConstructor.makeUpdateQueryStr(query, data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)});
+
+        return status;
+
+    }
+    */
+
+    private async getSchema(table: string): Promise<void> {
+        const result = await this.client.query(`
+                                               SELECT column_name, data_type 
+                                               FROM information_schema.columns 
+                                               WHERE table_name = '${table}'
+                                               `);
+
+                                               this.schema = result.rows;
+                                               return SchemaConverter.convert(this.schema);
+    }
+}

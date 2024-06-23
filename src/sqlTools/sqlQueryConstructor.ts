@@ -1,8 +1,9 @@
 
 export class SqlQueryConstructor {
-    public static makeSelectionQueryStr(query: any, table: string): string  {
-        let queryStr = `SELECT * FROM ${table} WHERE `;
-        const keys = Object.keys(query);
+
+    public static makeSelectionQueryStr(data: object, table: string): string  {
+        const query = data["query"];
+        let queryStr = `SELECT * FROM ${table} WHERE `; const keys = Object.keys(query);
         if(keys.length != 0) {
             for (let i = 0; i < keys.length; i++) {
                 queryStr += `${keys[i]} = '${query[keys[i]]}'`;
@@ -16,7 +17,8 @@ export class SqlQueryConstructor {
         return `SELECT * FROM ${table};`; 
     }
 
-    public static makeInsertionQueryStr(query: any, table: string): string {
+    public static makeInsertionQueryStr(data: object, table: string): string {
+        const query = data["values"];
         let queryStr = `INSERT INTO ${table}(`;
         const keys = Object.keys(query);
         for(let i = 0; i < keys.length; i++) {
@@ -36,11 +38,13 @@ export class SqlQueryConstructor {
         return queryStr;
     }
 
-    public static makeUpdateQueryStr(query: any, data: any, table: string): string {
+    public static makeUpdateQueryStr(data: object, table: string): string {
+        const query = data["query"];
+        const newValues = data["values"];
         let queryStr = `UPDATE ${table} SET `;
-        const dataKeys = Object.keys(data);
+        const dataKeys = Object.keys(newValues);
         for (let i = 0; i < dataKeys.length; i++) {
-          queryStr += `${dataKeys[i]} = '${data[dataKeys[i]]}'`;
+          queryStr += `${dataKeys[i]} = '${newValues[dataKeys[i]]}'`;
           if(i < dataKeys.length - 1)
             queryStr += ', ';
           else 
@@ -57,7 +61,8 @@ export class SqlQueryConstructor {
         return queryStr;
     }
 
-    public static makeDeletionQueryStr(query: any, table: string): string {
+    public static makeDeletionQueryStr(data: object, table: string): string {
+        const query = data["query"];
         let queryStr = `DELETE FROM ${table} WHERE `;
         const keys = Object.keys(query);
         for (let i = 0; i < keys.length; i++) {

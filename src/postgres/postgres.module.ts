@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
 import { DbDataService } from 'src/db-data/db-data.service';
 import { dbDataProviders } from 'src/providers/db-data.providers';
+import { PostgresDAO } from './postgres.dao';
 
 @Module({
   controllers: [PostgresController],
@@ -19,6 +20,7 @@ import { dbDataProviders } from 'src/providers/db-data.providers';
       JwtService,
       BlacklistService,
       DbDataService,
+      PostgresDAO,
       ...databaseProviders,
       ...usersProviders,
       ...dbDataProviders
