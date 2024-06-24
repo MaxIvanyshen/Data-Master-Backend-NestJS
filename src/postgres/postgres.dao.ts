@@ -32,9 +32,7 @@ export class PostgresDAO {
 
     public async insert(db: DbData, req: SqlRequest) {
         await this.connectToDB(db);
-        const q = SqlQueryConstructor.makeInsertionQueryStr(req.data, req.table);
-        console.log(q);
-        await this.client.query(q)
+        await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
         this.disconnect();
     }

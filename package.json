@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/sequelize": "^10.0.1",
     "@types/bcrypt": "^5.0.2",
+    "@types/lru-cache": "^7.10.10",
     "@types/mongodb": "^4.0.7",
     "@types/passport": "^1.0.16",
     "bcrypt": "^5.1.1",

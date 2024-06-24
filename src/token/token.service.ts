@@ -14,7 +14,7 @@ export class TokenService {
 
   async getUUID(token: string): Promise<string> | undefined {
       if(!token) {
-          return undefined
+          return undefined;
       }
       try {
           const payload = await this.jwtService.verifyAsync(token, { secret: jwtConstants.secret });

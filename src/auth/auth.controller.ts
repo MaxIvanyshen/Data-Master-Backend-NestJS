@@ -42,7 +42,6 @@ export class AuthController {
             return res.status(HttpStatus.FORBIDDEN).json({ message: 'Refresh token missing' });
         }
         const refreshToken = req.cookies['refreshToken'];
-        console.log(refreshToken);
 
         try {
             const { newAccessToken, newRefreshToken } = await this.authService.refreshToken(refreshToken);
