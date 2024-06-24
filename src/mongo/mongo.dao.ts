@@ -9,7 +9,18 @@ export class MongoDAO {
     private database: any
 
     async connectToDB(db: DbData) {
-        this.client = new MongoClient(db.data["connection_string"]);
+        let uri = undefined;
+        if(db.data["connection_string"]) {
+            uri = db.data["connection_string"];
+        }
+        else if(db.data["connection_data"]) {
+            uri = `mongodb+srv://${db.data["connection_data"]["user"]}:${db.data["connection_data"]["password"]}@${db.data["connection_data"]["cluster"]}.cmf0gre.mongodb.net/mydb?retryWrites=true&w=majority`;
+        }
+
+        if(!uri) {
+            throw new InternalServerErrorException("couldn't connect to database. Invalid connection data");
+        }
+        this.client = new MongoClient(uri);
         try {
             await this.client.connect();
             this.database = this.client.db(db.data["connection_data"]["database"]);
