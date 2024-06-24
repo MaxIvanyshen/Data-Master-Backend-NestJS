@@ -7,11 +7,13 @@ import {
     Patch,
     Delete,
     Req,
-    UseGuards
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
 import { PostgresService } from './postgres.service';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('postgres')
 export class PostgresController {
@@ -24,6 +26,7 @@ export class PostgresController {
         await this.service.saveDbData(req);
     }
 
+    @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
     @Get()

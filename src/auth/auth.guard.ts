@@ -1,15 +1,15 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
-import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
 import { TokenService } from 'src/token/token.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,13 +27,10 @@ export class AuthGuard implements CanActivate {
     }
     try {
       const uuid = await this.tokenService.getUUID(token);
-      if(!uuid) {
-          throw new UnauthorizedException('Invalid refresh token')
-      }
       const user = await this.usersService.findByUUID(uuid);
       if(!user || user.accessToken !== token ||
          await this.blacklistService.isTokenBlacklisted(user.accessToken)) {
-          throw new UnauthorizedException('Invalid refresh token')
+          throw new UnauthorizedException('Invalid access token')
       }
     } catch {
       throw new UnauthorizedException();

@@ -17,12 +17,19 @@ import { DbData } from './db-data/entity/db-data.entity';
 import { User } from './user/entity/user.entity';
 import { MysqlModule } from './mysql/mysql.module';
 import { MongoModule } from './mongo/mongo.module';
+import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
       ConfigModule.forRoot({
           envFilePath: ['.env.dev'],
           isGlobal: true,
+      }),
+      CacheModule.register({
+          isGlobal: true,
+          ttl: +process.env.RESPONSE_CACHE_TTL,
+          max: +process.env.MAX_CACHE,
       }),
       SequelizeModule.forRoot({
         dialect: 'postgres',
@@ -43,7 +50,7 @@ import { MongoModule } from './mongo/mongo.module';
       MysqlModule,
       MongoModule,
   ],
-  providers: [
+  providers: [ 
       AuthGuard,
       UserService,
       JwtService,
@@ -51,6 +58,10 @@ import { MongoModule } from './mongo/mongo.module';
       ...databaseProviders,
       ...usersProviders,
       TokenService,
+      {
+          provide: APP_INTERCEPTOR,
+          useClass: CacheInterceptor,
+      },
   ],
 })
 export class AppModule implements NestModule {

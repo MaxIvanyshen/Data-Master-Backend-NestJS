@@ -7,10 +7,12 @@ import {
     Patch,
     Delete,
     Req,
-    UseGuards
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { MysqlService } from './mysql.service';
 
 @Controller('mysql')
@@ -24,6 +26,7 @@ export class MysqlController {
         await this.service.saveDbData(req);
     }
 
+    @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
     @Get()

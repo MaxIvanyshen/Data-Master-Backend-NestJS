@@ -7,11 +7,13 @@ import {
     Patch,
     Delete,
     Req,
-    UseGuards
+    UseGuards,
+    UseInterceptors
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
 import { MongoService } from './mongo.service';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('mongo')
 export class MongoController {
@@ -24,6 +26,7 @@ export class MongoController {
         await this.service.saveDbData(req);
     }
 
+    @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
     @Get()
@@ -52,6 +55,7 @@ export class MongoController {
         await this.service.delete(req);
     }
 
+    @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
     @Get('collection')
