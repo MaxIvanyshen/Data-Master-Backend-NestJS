@@ -15,45 +15,44 @@ export class PostgresService {
     ) {}
 
     async saveDbData(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const uuid = await this.tokenService.getUUID(token);
+        const uuid = await this.tokenService.getUUID(
+            await this.tokenService.extractTokenFromHeader(req)
+        );
         const data = req.body;
         await this.dbDataService.save(uuid, data, Db.PostgreSQL);
     }
 
     async select(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
-        const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
+        const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.select(db, sqlReq);
     }
 
     async insert(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
-        const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
+        const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.insert(db, sqlReq);
     }
 
     async update(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
-        const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
+        const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.update(db, sqlReq);
     }
 
     async delete(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
-        const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
+        const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.delete(db, sqlReq);
     }
 
     async custom(req: Request) {
+        const { db, sqlReq } = await this.getQuery(req);
+        return await this.dao.custom(db, sqlReq);
+    }
+
+    private async getQuery(req: Request) {
         const token = await this.tokenService.extractTokenFromHeader(req);
         const sqlReq: SqlRequest = req.body;
         const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
-        return await this.dao.custom(db, sqlReq);
+
+        return { db, sqlReq };
     }
 
     private async getDb(uuid: string, dbName: string): Promise<DbData> {
