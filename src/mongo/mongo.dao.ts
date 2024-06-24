@@ -66,9 +66,22 @@ export class MongoDAO {
         await this.disconnect();
     }
 
+    async getCollections(db: DbData) {
+        await this.connectToDB(db);
+        const collections = await this.database.listCollections().toArray();
+        await this.disconnect();
+        return collections;
+    }
+
     async createCollection(db: DbData, req: MongoRequest) {
         await this.connectToDB(db);
         await this.database.createCollection(req.collection);
+        await this.disconnect();
+    }
+
+    async dropCollection(db: DbData, req: MongoRequest) {
+        await this.connectToDB(db);
+        await this.database.dropCollection(req.collection);
         await this.disconnect();
     }
 }

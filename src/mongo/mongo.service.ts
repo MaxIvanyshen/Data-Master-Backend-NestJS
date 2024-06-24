@@ -20,7 +20,7 @@ export class MongoService {
             await this.tokenService.extractTokenFromHeader(req)
         );
         const data = req.body;
-        this.dbDataService.save(uuid, data, Db.MongoDB);
+        await this.dbDataService.save(uuid, data, Db.MongoDB);
     }
 
     async select(req: Request) {
@@ -30,22 +30,32 @@ export class MongoService {
 
     async insert(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        this.dao.insert(db, mongoReq);
+        await this.dao.insert(db, mongoReq);
     }
 
     async update(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        this.dao.update(db, mongoReq);
+        await this.dao.update(db, mongoReq);
     }
 
     async delete(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        this.dao.delete(db, mongoReq);
+        await this.dao.delete(db, mongoReq);
+    }
+
+    async getCollections(req: Request) {
+        const { db } = await this.getQuery(req); 
+        return await this.dao.getCollections(db);
     }
 
     async createCollection(req: Request) {
         const { db, mongoReq } = await this.getQuery(req); 
-        this.dao.createCollection(db, mongoReq);
+        await this.dao.createCollection(db, mongoReq);
+    }
+
+    async dropCollection(req: Request) {
+        const { db, mongoReq } = await this.getQuery(req); 
+        await this.dao.dropCollection(db, mongoReq);
     }
 
     private async getQuery(req: Request) {
