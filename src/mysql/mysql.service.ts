@@ -73,9 +73,9 @@ export class MysqlService {
     }
 
     private async getDb(uuid: string, dbName: string): Promise<DbData> {
-        const postgresData = await this.dbDataService.findByUserAndDb(uuid, Db.MySQl);
+        const mysqlData = await this.dbDataService.findByUserAndDb(uuid, Db.MySQl);
 
-        const found = postgresData.find(db => {
+        const found = mysqlData.find(db => {
             if(db.data["connection_data"]) {
                 return db.data["connection_data"]["database"] === dbName;
             }

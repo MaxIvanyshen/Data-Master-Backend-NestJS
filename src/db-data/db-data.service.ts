@@ -10,6 +10,7 @@ export class DbDataService {
 
     async save(uuid: string, data: object, db: Db) {
         const dbData = new DbData();
+
         dbData.id = await this.dbDataRepo.count() + 1;
         dbData.userId = uuid;
         dbData.data = data;

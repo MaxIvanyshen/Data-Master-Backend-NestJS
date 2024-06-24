@@ -16,6 +16,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { DbData } from './db-data/entity/db-data.entity';
 import { User } from './user/entity/user.entity';
 import { MysqlModule } from './mysql/mysql.module';
+import { MongoModule } from './mongo/mongo.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { MysqlModule } from './mysql/mysql.module';
       PostgresModule,
       DbDataModule,
       MysqlModule,
+      MongoModule,
   ],
   providers: [
       AuthGuard,
