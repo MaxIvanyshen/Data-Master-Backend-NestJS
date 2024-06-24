@@ -72,28 +72,4 @@ export class PostgresDAO {
         this.disconnect();
         return result.rows;
     }
-
-        /*
-    public async update(query: any, data: any): Promise<number> {
-        if(this.schema == null)
-            await this.getSchema();
-
-        let status = this.OK;
-        await this.client.query(SqlQueryConstructor.makeUpdateQueryStr(query, data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)});
-
-        return status;
-
-    }
-    */
-
-    private async getSchema(table: string): Promise<void> {
-        const result = await this.client.query(`
-                                               SELECT column_name, data_type 
-                                               FROM information_schema.columns 
-                                               WHERE table_name = '${table}'
-                                               `);
-
-                                               this.schema = result.rows;
-                                               return SchemaConverter.convert(this.schema);
-    }
 }
