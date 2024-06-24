@@ -65,4 +65,10 @@ export class MongoDAO {
         await collection.deleteMany(req.data["query"]);
         await this.disconnect();
     }
+
+    async createCollection(db: DbData, req: MongoRequest) {
+        await this.connectToDB(db);
+        await this.database.createCollection(req.collection);
+        await this.disconnect();
+    }
 }

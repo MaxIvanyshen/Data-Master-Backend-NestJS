@@ -20,7 +20,7 @@ export class MongoService {
             await this.tokenService.extractTokenFromHeader(req)
         );
         const data = req.body;
-        await this.dbDataService.save(uuid, data, Db.MongoDB);
+        this.dbDataService.save(uuid, data, Db.MongoDB);
     }
 
     async select(req: Request) {
@@ -30,17 +30,22 @@ export class MongoService {
 
     async insert(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        await this.dao.insert(db, mongoReq);
+        this.dao.insert(db, mongoReq);
     }
 
     async update(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        await this.dao.update(db, mongoReq);
+        this.dao.update(db, mongoReq);
     }
 
     async delete(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
-        await this.dao.delete(db, mongoReq);
+        this.dao.delete(db, mongoReq);
+    }
+
+    async createCollection(req: Request) {
+        const { db, mongoReq } = await this.getQuery(req); 
+        this.dao.createCollection(db, mongoReq);
     }
 
     private async getQuery(req: Request) {
