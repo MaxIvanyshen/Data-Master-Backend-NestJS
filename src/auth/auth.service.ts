@@ -50,7 +50,7 @@ export class AuthService {
             const uuid = payload.sub;
 
             const user = await this.usersService.findByUUID(uuid);
-            if(!user || user.refreshToken != refreshToken ||
+            if(!user || user.refreshToken !== refreshToken ||
              await this.blacklistService.isTokenBlacklisted(refreshToken)) {
                 throw new UnauthorizedException('Invalid refresh token')
             }

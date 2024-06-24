@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
           throw new UnauthorizedException('Invalid refresh token')
       }
       const user = await this.usersService.findByUUID(uuid);
-      if(!user || user.accessToken != token ||
+      if(!user || user.accessToken !== token ||
          await this.blacklistService.isTokenBlacklisted(user.accessToken)) {
           throw new UnauthorizedException('Invalid refresh token')
       }

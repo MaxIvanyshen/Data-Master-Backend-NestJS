@@ -59,7 +59,14 @@ export class PostgresService {
     private async getDb(uuid: string, dbName: string): Promise<DbData> {
         const postgresData = await this.dbDataService.findByUserAndDb(uuid, Db.PostgreSQL);
 
-        const found = postgresData.find(db => db.data["connection_data"]["database"] === dbName);
+        const found = postgresData.find(db => {
+            if(db.data["connection_data"]) {
+                return db.data["connection_data"]["database"] === dbName;
+            }
+            else {
+                return db.data["connection_string"].split("/")[3] === dbName;
+            }
+        });
         if(!found) {
             throw new NotFoundException("Can't find database with name '" + dbName + "'");
         }

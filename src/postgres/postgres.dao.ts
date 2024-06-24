@@ -9,13 +9,16 @@ export class PostgresDAO {
     public readonly OK = 0;
     public readonly ERROR = 1;
 
-    private data: any = null;
     private client: any = null;
 
     private schema: any = null;
 
     public async connectToDB(dbData: DbData): Promise<number> {
-        this.client = new Client(dbData.data["connection_data"]);
+        if(dbData.data["connection_string"]) {
+            this.client = new Client({ connectionString: dbData.data["connection_string"] });
+        } else {
+            this.client = new Client(dbData.data["connection_data"]);
+        }
         let status: number = 0;
         this.client.connect((err: any) => {
             if (err) {
