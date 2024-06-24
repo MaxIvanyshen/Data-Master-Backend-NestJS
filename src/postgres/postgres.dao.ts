@@ -1,6 +1,5 @@
 import { Client } from 'pg';
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
-import { SchemaConverter } from "../sqlTools/sqlSchemaConverter";
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import { SqlRequest } from 'src/db-requests/sqlRequest';
@@ -10,8 +9,6 @@ export class PostgresDAO {
     public readonly ERROR = 1;
 
     private client: any = null;
-
-    private schema: any = null;
 
     public async connectToDB(dbData: DbData): Promise<number> {
         if(dbData.data["connection_string"]) {

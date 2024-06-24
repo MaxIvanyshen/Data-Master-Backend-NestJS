@@ -1,5 +1,4 @@
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
-import { SchemaConverter } from "../sqlTools/sqlSchemaConverter";
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import * as mysql from "mysql";
