@@ -24,23 +24,34 @@ export class MongoService {
     }
 
     async select(req: Request) {
-        const token = await this.tokenService.extractTokenFromHeader(req);
-        const uuid = await this.tokenService.getUUID(token);
-        
-        const mongoReq: MongoRequest = req.body;
-
-        const db = await this.getDb(uuid, mongoReq.database);
+        const { db, mongoReq } = await this.getQuery(req);
         return await this.dao.select(db, mongoReq);
     }
 
     async insert(req: Request) {
+        const { db, mongoReq } = await this.getQuery(req);
+        await this.dao.insert(db, mongoReq);
+    }
+
+    async update(req: Request) {
+        const { db, mongoReq } = await this.getQuery(req);
+        await this.dao.update(db, mongoReq);
+    }
+
+    async delete(req: Request) {
+        const { db, mongoReq } = await this.getQuery(req);
+        await this.dao.delete(db, mongoReq);
+    }
+
+    private async getQuery(req: Request) {
         const token = await this.tokenService.extractTokenFromHeader(req);
         const uuid = await this.tokenService.getUUID(token);
         
         const mongoReq: MongoRequest = req.body;
 
         const db = await this.getDb(uuid, mongoReq.database);
-        return await this.dao.insert(db, mongoReq);
+
+        return { db, mongoReq };
     }
 
     private async getDb(uuid: string, dbName: string): Promise<DbData> {
@@ -51,6 +62,7 @@ export class MongoService {
                 return db.data["connection_data"]["database"] === dbName;
             }
         });
+
         if(!found) {
             throw new NotFoundException("Can't find database with name '" + dbName + "'");
         }

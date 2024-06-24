@@ -38,7 +38,6 @@ export class MongoController {
         return await this.service.insert(req);
     }
 
-    /*
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
     @Patch()
@@ -52,12 +51,4 @@ export class MongoController {
     async delete(@Req() req: Request) {
         return await this.service.delete(req);
     }
-
-    @UseGuards(AuthGuard)
-    @HttpCode(HttpStatus.OK)
-    @Post("custom")
-    async custom(@Req() req: Request) {
-        return await this.service.custom(req);
-    }
-    */
 }
