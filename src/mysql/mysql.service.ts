@@ -19,6 +19,23 @@ export class MysqlService {
             await this.tokenService.extractTokenFromHeader(req)
         );
         const data = req.body;
+        if(data["connection_string"]) {
+            const vals = data["connection_string"].split("/");
+
+            const [ userData, hostData ] = vals[2].split("@");
+            console.log(userData, hostData);
+            const [ user, password ] = userData.split(":");
+            const [ host, port ] = hostData.split(":");
+            const dbName = vals[3];
+
+            data["connection_data"] = {
+                "host": host,
+                "port": port,
+                "user": user,
+                "password": password,
+                "database": dbName,
+            }
+        }
         await this.dbDataService.save(uuid, data, Db.MySQl);
     }
 
