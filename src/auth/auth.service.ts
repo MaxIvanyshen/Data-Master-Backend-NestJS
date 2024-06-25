@@ -59,8 +59,8 @@ export class AuthService {
             this.blacklistService.addTokenToBlacklist(refreshToken);
 
             const newPayload = { sub: payload.sub };
-            const newAccessToken = this.jwtService.sign(newPayload, { secret: jwtConstants.secret,  expiresIn: '15m' });
-            const newRefreshToken = this.jwtService.sign(newPayload, { secret: jwtConstants.secret,  expiresIn: '14d' });
+            const newAccessToken = this.jwtService.sign(newPayload, { secret: jwtConstants.secret,  expiresIn: process.env.ACCESS_TOKEN_TTL });
+            const newRefreshToken = this.jwtService.sign(newPayload, { secret: jwtConstants.secret,  expiresIn: process.env.REFRESH_TOKEN_TTL });
 
             user.accessToken = newAccessToken;
             user.refreshToken = newRefreshToken;
