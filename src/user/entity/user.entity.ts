@@ -1,4 +1,4 @@
-import { Column, Model, DataType, PrimaryKey, Table, Unique, BeforeSave } from "sequelize-typescript";
+import { Column, Model, DataType, PrimaryKey, Table, Unique, BeforeSave, AllowNull } from "sequelize-typescript";
 import * as bcrypt from 'bcrypt';
 
 @Table({tableName: 'users'})
@@ -10,6 +10,9 @@ export class User extends Model {
         defaultValue: DataType.UUIDV4
     }) 
     id: string;
+
+    @Column
+    loginType: LoginType
     
     @Column({
         type: "varchar" 
@@ -21,6 +24,7 @@ export class User extends Model {
     })
     lastname: string;
 
+    @AllowNull
     @Column({
         type: "varchar" 
     })
@@ -45,4 +49,9 @@ export class User extends Model {
             user.password = await bcrypt.hash(user.password, salt);
         }
     }
+}
+
+export enum LoginType {
+    Password = 1,
+    Google,
 }

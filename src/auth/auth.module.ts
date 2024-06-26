@@ -8,9 +8,13 @@ import { databaseProviders } from 'src/providers/database.providers';
 import { usersProviders } from 'src/providers/users.providers';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
 import { TokenService } from 'src/token/token.service';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleStrategy } from './google.strategy';
+import { OAuthController } from './oauth.controller';
 
 @Module({
     imports: [
+        PassportModule.register({ defaultStrategy: 'google' }),
         JwtModule.registerAsync({
             useFactory: async () => ({
                 secret: jwtConstants.secret,
@@ -24,9 +28,10 @@ import { TokenService } from 'src/token/token.service';
         JwtService,
         BlacklistService,
         TokenService,
+        GoogleStrategy,
         ...databaseProviders,
         ...usersProviders,
     ],
-    controllers: [AuthController],
+    controllers: [AuthController, OAuthController],
 })
 export class AuthModule {}

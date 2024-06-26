@@ -6,6 +6,7 @@ import * as bcrypt from "bcrypt";
 import { jwtConstants } from './constants';
 import { UserDto } from 'src/user/dto/user.dto';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
+import { LoginType } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -16,13 +17,42 @@ export class AuthService {
     ) {}
 
     async register(dto: UserDto): Promise<UserDto> {
-        return await this.usersService.create(dto);
+        return await this.usersService.create(dto, LoginType.Password);
     }
 
     async login(dto: LoginUserDto) {
        const user = await this.usersService.findByEmail(dto.email);
        if (!user || !await bcrypt.compare(dto.password, user.password)) {
             throw new UnauthorizedException("Invalid Credentials");
+       }
+
+       if(user.accessToken) {
+           this.blacklistService.addTokenToBlacklist(user.accessToken);
+       }
+       if(user.refreshToken) {
+           this.blacklistService.addTokenToBlacklist(user.refreshToken);
+       }
+
+       const payload = { sub: user.id };
+       const accessToken = this.jwtService.sign(payload, { secret: jwtConstants.secret,  expiresIn: '15m' });
+       const refreshToken = this.jwtService.sign(payload, { secret: jwtConstants.secret,  expiresIn: '14d' });
+
+       user.accessToken = accessToken;
+       user.refreshToken = refreshToken;
+
+       await user.save();
+
+       return { accessToken, refreshToken };
+    }
+
+    async loginGoogle(dto: UserDto) {
+       let user = await this.usersService.findByEmail(dto.email);
+       if (!user) {
+           user = await this.usersService.create(dto, LoginType.Google);
+       }
+
+       if(user.loginType != LoginType.Google) {
+           throw new UnauthorizedException("cannot login with Google. Email already in use");
        }
 
        if(user.accessToken) {

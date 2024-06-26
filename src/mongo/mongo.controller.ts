@@ -13,7 +13,7 @@ import {
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
 import { MongoService } from './mongo.service';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('mongo')
 export class MongoController {

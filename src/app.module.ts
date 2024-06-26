@@ -17,8 +17,7 @@ import { DbData } from './db-data/entity/db-data.entity';
 import { User } from './user/entity/user.entity';
 import { MysqlModule } from './mysql/mysql.module';
 import { MongoModule } from './mongo/mongo.module';
-import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -58,10 +57,6 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       ...databaseProviders,
       ...usersProviders,
       TokenService,
-      {
-          provide: APP_INTERCEPTOR,
-          useClass: CacheInterceptor,
-      },
   ],
 })
 export class AppModule implements NestModule {
