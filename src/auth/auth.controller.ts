@@ -1,6 +1,8 @@
 import { AuthService } from './auth.service';
-import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode } from '@nestjs/common';
+import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode, UsePipes } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { PasswordValidationPipe } from 'src/pipes/password-validation.pipe';
+import { EmailValidationPipe } from 'src/pipes/email-validation.pipe';
 import { TokenService } from 'src/token/token.service';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
 import { UserDto } from 'src/user/dto/user.dto';
@@ -14,7 +16,7 @@ export class AuthController {
     ) {}
 
     @Post('register')
-    async register(@Body() createUserDto: UserDto, @Res() res: Response) {
+    async register(@Body(EmailValidationPipe, PasswordValidationPipe) createUserDto: UserDto, @Res() res: Response) {
         try {
             const user = await this.authService.register(createUserDto);
             const { accessToken, refreshToken } = await this.authService.login({ email: user.email, password: createUserDto.password });
@@ -26,7 +28,7 @@ export class AuthController {
     }
 
     @Post('login')
-    async login(@Body() loginDto: LoginUserDto, @Res() res: Response) {
+    async login(@Body(EmailValidationPipe) loginDto: LoginUserDto, @Res() res: Response) {
         try {
             const { accessToken, refreshToken } = await this.authService.login(loginDto); 
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 14 * 24 * 60 * 60 * 1000 });

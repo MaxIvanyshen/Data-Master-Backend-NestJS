@@ -18,6 +18,7 @@ import { User } from './user/entity/user.entity';
 import { MysqlModule } from './mysql/mysql.module';
 import { MongoModule } from './mongo/mongo.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { PasswordValidationPipe } from './pipes/password-validation.pipe';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { CacheModule } from '@nestjs/cache-manager';
       UserService,
       JwtService,
       BlacklistService,
+      PasswordValidationPipe,
       ...databaseProviders,
       ...usersProviders,
       TokenService,
