@@ -20,7 +20,7 @@ export class UserService {
     }
 
     async create(dto: UserDto, loginType: LoginType) {
-        if(!await this.userRepo.findOne({ where: { email: dto.email }})) {
+        if(await this.userRepo.findOne({ where: { email: dto.email }})) {
             throw new ConflictException("email already in use");
         }
 

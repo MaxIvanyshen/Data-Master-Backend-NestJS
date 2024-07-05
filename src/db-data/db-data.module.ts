@@ -4,6 +4,6 @@ import { databaseProviders } from 'src/providers/database.providers';
 import { dbDataProviders } from 'src/providers/db-data.providers';
 
 @Module({
-  providers: [DbDataService, ...databaseProviders, ...dbDataProviders]
+  providers: [DbDataService, ...databaseProviders, ...dbDataProviders],
 })
 export class DbDataModule {}
