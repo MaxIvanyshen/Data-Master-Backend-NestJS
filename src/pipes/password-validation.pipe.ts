@@ -1,22 +1,19 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import { UserDto } from 'src/user/dto/user.dto';
+import { LoginUserDto } from 'src/user/dto/login-user.dto';
 
 @Injectable()
 export class PasswordValidationPipe implements PipeTransform {
-  transform(req: UserDto) {
-      if (typeof req.password !== 'string') {
-          throw new BadRequestException('Password must be a string');
-      }
-
+  transform(req: UserDto | LoginUserDto) {
       const password = req.password.trim();
 
       const isValid = this.validatePassword(password);
 
       if (!isValid) {
-          throw new BadRequestException('Password should be at least 8 characters long and include at least one number');
+          throw new BadRequestException('Password should be at least 8 characters long and contain at least one number');
       }
 
-      return password;
+      return req;
   }
 
   private validatePassword(password: string): boolean {

@@ -14,7 +14,7 @@ export class EmailValidationPipe implements PipeTransform {
           throw new BadRequestException('Invalid email format');
       }
 
-      return email;
+      return req;
   }
 
 }
