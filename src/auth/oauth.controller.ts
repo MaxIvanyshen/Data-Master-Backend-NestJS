@@ -11,7 +11,6 @@ export class OAuthController {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly tokenService: TokenService,
     ) {}
 
     @Get('google')
@@ -33,13 +32,8 @@ export class OAuthController {
             dto.lastname = req.user["lastname"];
 
             const { accessToken, refreshToken } = await this.authService.loginGoogle(dto);
-            res.set({
-                'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 14 * 24 * 60 * 60 * 1000 }); // 14 days
-            res.status(HttpStatus.CREATED).json({ accessToken });
+            res.redirect(process.env.FRONTEND_URL + `/?token=${accessToken}`);
         } catch (error) {
             res.status(HttpStatus.CONFLICT).json({ message: error.message });
         }
