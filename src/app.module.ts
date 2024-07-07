@@ -19,6 +19,8 @@ import { MysqlModule } from './mysql/mysql.module';
 import { MongoModule } from './mongo/mongo.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { PasswordValidationPipe } from './pipes/password-validation.pipe';
+import { dbDataProviders } from './providers/db-data.providers';
+import { DbDataService } from './db-data/db-data.service';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { PasswordValidationPipe } from './pipes/password-validation.pipe';
       JwtService,
       BlacklistService,
       PasswordValidationPipe,
+      DbDataService,
+      ...dbDataProviders,
       ...databaseProviders,
       ...usersProviders,
       TokenService,

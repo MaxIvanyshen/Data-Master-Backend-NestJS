@@ -35,7 +35,7 @@ export class MysqlService {
                 "database": dbName,
             }
         }
-        await this.dbDataService.save(uuid, data, Db.MySQl);
+        await this.dbDataService.save(uuid, data, Db.MySQL);
     }
 
     async select(req: Request) {
@@ -72,7 +72,7 @@ export class MysqlService {
     }
 
     private async getDb(uuid: string, dbName: string): Promise<DbData> {
-        const mysqlData = await this.dbDataService.findByUserAndDb(uuid, Db.MySQl);
+        const mysqlData = await this.dbDataService.findByUserAndDb(uuid, Db.MySQL);
 
         const found = mysqlData.find(db => {
             if(db.data["connection_data"]) {

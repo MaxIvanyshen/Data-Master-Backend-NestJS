@@ -11,6 +11,8 @@ import { TokenService } from 'src/token/token.service';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './google.strategy';
 import { OAuthController } from './oauth.controller';
+import { DbDataService } from 'src/db-data/db-data.service';
+import { dbDataProviders } from 'src/providers/db-data.providers';
 
 @Module({
     imports: [
@@ -29,8 +31,10 @@ import { OAuthController } from './oauth.controller';
         BlacklistService,
         TokenService,
         GoogleStrategy,
+        DbDataService,
         ...databaseProviders,
         ...usersProviders,
+        ...dbDataProviders,
     ],
     controllers: [AuthController, OAuthController],
 })

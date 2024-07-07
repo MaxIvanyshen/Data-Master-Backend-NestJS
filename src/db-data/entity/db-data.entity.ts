@@ -25,6 +25,6 @@ export class DbData extends Model {
 
 export enum Db {
     PostgreSQL = 1,
-    MySQl,
+    MySQL,
     MongoDB,
 }
