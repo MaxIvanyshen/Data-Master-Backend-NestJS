@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Header, Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -10,6 +10,7 @@ export class UserController {
     ){}
 
     @Get()
+    @Header('Access-Control-Allow-Origin', '*')
     @UseGuards(AuthGuard)
     async getUserInfo(@Req() req: Request) {
         return this.userService.getUserInfo(req)   

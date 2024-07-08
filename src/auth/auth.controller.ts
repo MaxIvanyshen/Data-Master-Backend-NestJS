@@ -1,15 +1,15 @@
 import { AuthService } from './auth.service';
-import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode, UsePipes } from '@nestjs/common';
+import { Post, Body, Res, Req, Controller, HttpStatus, UnauthorizedException, HttpCode, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { PasswordValidationPipe } from 'src/pipes/password-validation.pipe';
 import { EmailValidationPipe } from 'src/pipes/email-validation.pipe';
 import { TokenService } from 'src/token/token.service';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
 import { UserDto } from 'src/user/dto/user.dto';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
-
     constructor(
         private readonly authService: AuthService,
         private readonly tokenService: TokenService,
@@ -56,6 +56,7 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('logout')
+    @UseGuards(AuthGuard)
     async logout(@Req() req: Request) {
         return this.authService.logout(await this.tokenService.extractTokenFromHeader(req))
     }

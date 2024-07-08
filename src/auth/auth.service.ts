@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
 import { UserService } from 'src/user/user.service';
@@ -7,6 +7,7 @@ import { jwtConstants } from './constants';
 import { UserDto } from 'src/user/dto/user.dto';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
 import { LoginType } from 'src/user/entity/user.entity';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,9 @@ export class AuthService {
         private readonly usersService: UserService,
         private readonly jwtService: JwtService,
         private readonly blacklistService: BlacklistService,
+
+        @Inject(CACHE_MANAGER)
+        private cacheManager: Cache
     ) {}
 
     async register(dto: UserDto): Promise<UserDto> {
@@ -104,6 +108,7 @@ export class AuthService {
     }
 
     async logout(token: string) {
+        await this.cacheManager.del(token);
         await this.blacklistService.addTokenToBlacklist(token);
     }
 }
