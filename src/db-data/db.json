@@ -1,0 +1,32 @@
+{
+    "PostgreSQL": {
+        "connection_string": "",
+        "connection_data": {
+            "host": "",
+            "port": 0,
+            "username": "",
+            "password": "",
+            "database": "",
+        }
+    },
+    "MySQL": {
+        "connection_string": "",
+        "connection_data": {
+            "host": "",
+            "port": 0,
+            "username": "",
+            "password": "",
+            "database": "",
+        }
+    },
+    "MongoDB": {
+        "connection_string": "",
+        "connection_data": {
+            "host": "",
+            "port": 0,
+            "username": "",
+            "password": "",
+            "database": "",
+        }
+    }
+}

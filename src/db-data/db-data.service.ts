@@ -1,11 +1,13 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { Db, DbData } from './entity/db-data.entity';
+import * as dbInfo from './db.json';
 
 @Injectable()
 export class DbDataService {
     constructor(
         @Inject("DB_DATA_REPOSITORY")
         private readonly dbDataRepo: typeof DbData,
+
     ){}
 
     async save(uuid: string, data: object, db: Db) {
@@ -38,5 +40,9 @@ export class DbDataService {
             return data["connection_string"].split("/")[3];
         }
         return data["connection_data"]["database"];
+    }
+
+    async getDbInfo() {
+        return dbInfo;
     }
 }

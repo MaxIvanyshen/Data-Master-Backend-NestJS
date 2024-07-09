@@ -8,6 +8,7 @@ import { usersProviders } from 'src/providers/users.providers';
 import { BlacklistService } from 'src/blacklist/blacklist.service';
 import { TokenService } from 'src/token/token.service';
 import { JwtService } from '@nestjs/jwt';
+import { DbDataController } from './db-data.controller';
 
 @Module({
   providers: [
@@ -21,5 +22,6 @@ import { JwtService } from '@nestjs/jwt';
       ...dbDataProviders,
       ...usersProviders
   ],
+  controllers: [DbDataController],
 })
 export class DbDataModule {}
