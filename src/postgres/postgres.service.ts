@@ -19,6 +19,7 @@ export class PostgresService {
             await this.tokenService.extractTokenFromHeader(req)
         );
         const data = req.body;
+        console.log("data: " +  data["connection_data"]);
         await this.dbDataService.save(uuid, data, Db.PostgreSQL);
     }
 

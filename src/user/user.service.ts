@@ -50,10 +50,25 @@ export class UserService {
         userInfo.firstname = user.firstname;
         userInfo.lastname = user.lastname;
         userInfo.email = user.email;
-        userInfo.databases = new Map<String, DbData[]>;
-        userInfo.databases.set('Postgres', await this.dbDataService.findByUserAndDb(uuid, Db.PostgreSQL));
-        userInfo.databases.set('MySQL', await this.dbDataService.findByUserAndDb(uuid, Db.MySQL));
-        userInfo.databases.set('MongoDB', await this.dbDataService.findByUserAndDb(uuid, Db.MongoDB));
+        userInfo.databases = {};
+        
+        let psqlDbs = await this.dbDataService.findByUserAndDb(uuid, Db.PostgreSQL);
+        for(let i = 0; i < psqlDbs.length; i++) {
+            psqlDbs[i] = psqlDbs[i].dataValues;
+        }
+        userInfo.databases['PostgreSQL'] = psqlDbs;
+
+        let mysqlDbs = await this.dbDataService.findByUserAndDb(uuid, Db.MySQL);
+        for(let i = 0; i < mysqlDbs.length; i++) {
+            mysqlDbs[i] = mysqlDbs[i].dataValues;
+        }
+        userInfo.databases['MySQL'] = mysqlDbs;
+
+        let mongoDbs = await this.dbDataService.findByUserAndDb(uuid, Db.MongoDB);
+        for(let i = 0; i < mongoDbs.length; i++) {
+            mongoDbs[i] = mongoDbs[i].dataValues;
+        }
+        userInfo.databases['MongoDB'] = mongoDbs;
 
         return userInfo
     }

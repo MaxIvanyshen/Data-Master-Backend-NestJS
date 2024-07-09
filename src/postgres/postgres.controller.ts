@@ -23,6 +23,7 @@ export class PostgresController {
     @HttpCode(HttpStatus.OK)
     @Post('add-data')
     async addData(@Req() req: Request) {
+        console.log(req.body);
         await this.service.saveDbData(req);
     }
 
