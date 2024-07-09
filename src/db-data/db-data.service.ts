@@ -1,4 +1,4 @@
-import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, ConflictException, NotFoundException } from '@nestjs/common';
 import { Db, DbData } from './entity/db-data.entity';
 import * as dbInfo from './db.json';
 
@@ -20,9 +20,13 @@ export class DbDataService {
 
         const dbName = await this.parseDbName(dbData.data);
         const dbs = await this.findByUserAndDb(uuid, db);
-        const found = dbs.find(async (x) => {
-            await this.parseDbName(x.data) === dbName;
-        });
+
+        let found = undefined;
+        for(let i = 0; i < dbs.length; i++) {
+            if(dbs[i].dataValues["data"]["connection_data"]["database"] === dbName) {
+                found = dbs[i].dataValues;
+            }
+        }
 
         if(found) {
             throw new ConflictException("database with the same name already exists");
@@ -36,10 +40,13 @@ export class DbDataService {
     }
 
     private async parseDbName(data: object): Promise<string> {
+        if (data["connection_data"]["database"]) {
+            return data["connection_data"]["database"];
+        }
         if(data["connection_string"]) {
             return data["connection_string"].split("/")[3];
         }
-        return data["connection_data"]["database"];
+        throw new NotFoundException;
     }
 
     async getDbInfo() {
