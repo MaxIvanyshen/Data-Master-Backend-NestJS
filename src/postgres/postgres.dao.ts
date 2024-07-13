@@ -67,4 +67,15 @@ export class PostgresDAO {
         this.disconnect();
         return result.rows;
     }
+
+    public async getTables(db: DbData, req: SqlRequest): Promise<object> {
+        await this.connectToDB(db);
+        const result = await this.client.query(`SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+                    AND table_type = 'BASE TABLE';`)
+            .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
+        this.disconnect();
+        return result.rows;
+    }
 }

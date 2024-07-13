@@ -35,7 +35,7 @@ export class MysqlDAO {
             const query = promisify(this.client.query).bind(this.client);
             return await query(SqlQueryConstructor.makeSelectionQueryStr(req.data, req.table));
         } catch(err: any) {
-            throw new InternalServerErrorException("couldn't insert into database");
+            throw new InternalServerErrorException("couldn't select from database");
         } finally {
             this.client.end();
         }
@@ -71,7 +71,22 @@ export class MysqlDAO {
             const query = promisify(this.client.query).bind(this.client);
             return await query(req.data["query"]);
         } catch(err: any) {
-            throw new InternalServerErrorException("couldn't update database");
+            throw new InternalServerErrorException("couldn't query database");
+        } finally {
+            this.client.end();
+        }
+    }
+
+    public async getTables(db: DbData, req: SqlRequest) {
+        await this.connectToDB(db);
+        try {
+            const query = promisify(this.client.query).bind(this.client);
+            console.log('huy');
+            return await query(`SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_schema = '${req.database}';`);
+        } catch(err: any) {
+            throw new InternalServerErrorException("couldn't query database");
         } finally {
             this.client.end();
         }

@@ -63,4 +63,11 @@ export class PostgresController {
         return await this.service.custom(req);
     }
 
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Post("tables")
+    async getTables(@Req() req: Request) {
+        return await this.service.getTables(req);
+    }
+
 }
