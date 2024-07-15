@@ -47,9 +47,9 @@ export class PostgresService {
         return await this.dao.custom(db, sqlReq);
     }
 
-    async getTables(req: Request) {
-        const { db, sqlReq } = await this.getQuery(req);
-        return await this.dao.getTables(db, sqlReq);
+    async getTables(req: Request, db: string) {
+        const database = await this.getDb(await this.tokenService.getUUID(await this.tokenService.extractTokenFromHeader(req)), db);
+        return await this.dao.getTables(database, undefined);
     }
 
     private async getQuery(req: Request) {

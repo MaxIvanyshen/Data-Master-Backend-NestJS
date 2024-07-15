@@ -3,6 +3,7 @@ import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import { SqlRequest } from 'src/db-requests/sqlRequest';
+import { table } from 'console';
 
 export class PostgresDAO {
     public readonly OK = 0;
@@ -74,8 +75,12 @@ export class PostgresDAO {
                     FROM information_schema.tables
                     WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
                     AND table_type = 'BASE TABLE';`)
-            .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
+            .catch(() => { throw new InternalServerErrorException("couldn't select from the database"); });
         this.disconnect();
-        return result.rows;
+        let tableNames = []
+        for(let i = 0; i < result.rows.length; i++) {
+            tableNames.push(result.rows[i].table_name);
+        }
+        return tableNames;
     }
 }

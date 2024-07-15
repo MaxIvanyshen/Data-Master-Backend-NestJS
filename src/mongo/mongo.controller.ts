@@ -29,28 +29,28 @@ export class MongoController {
     @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Get()
+    @Post("select")
     async select(@Req() req: Request) {
         return await this.service.select(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post()
+    @Post("insert")
     async insert(@Req() req: Request) {
         await this.service.insert(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Patch()
+    @Patch("update")
     async update(@Req() req: Request) {
         await this.service.update(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Delete()
+    @Delete("delete")
     async delete(@Req() req: Request) {
         await this.service.delete(req);
     }

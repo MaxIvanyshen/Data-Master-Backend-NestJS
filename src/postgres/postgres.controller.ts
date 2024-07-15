@@ -9,6 +9,7 @@ import {
     Req,
     UseGuards,
     UseInterceptors,
+    Query,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
@@ -23,35 +24,35 @@ export class PostgresController {
     @HttpCode(HttpStatus.OK)
     @Post('add-data')
     async addData(@Req() req: Request) {
-        console.log(req.body);
         await this.service.saveDbData(req);
     }
 
     @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Get()
+    @Post("select")
     async select(@Req() req: Request) {
         return await this.service.select(req);
     }
 
+
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post()
+    @Post("insert")
     async insert(@Req() req: Request) {
         return await this.service.insert(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Patch()
+    @Patch("update")
     async update(@Req() req: Request) {
         return await this.service.update(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Delete()
+    @Delete("delete")
     async delete(@Req() req: Request) {
         return await this.service.delete(req);
     }
@@ -65,9 +66,9 @@ export class PostgresController {
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post("tables")
-    async getTables(@Req() req: Request) {
-        return await this.service.getTables(req);
+    @Get("tables")
+    async getTables(@Req() req: Request, @Query('database') db:string) {
+        return await this.service.getTables(req, db);
     }
 
 }
