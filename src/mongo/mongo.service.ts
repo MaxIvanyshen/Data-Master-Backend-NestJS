@@ -5,7 +5,7 @@ import { TokenService } from 'src/token/token.service';
 import { Db } from 'src/db-data/entity/db-data.entity';
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { MongoDAO } from './mongo.dao';
-import { MongoRequest } from 'src/db-requests/mongoRequest';
+import { DbRequest } from 'src/db-requests/dbRequest';
 
 @Injectable()
 export class MongoService {
@@ -43,9 +43,14 @@ export class MongoService {
         await this.dao.delete(db, mongoReq);
     }
 
-    async getCollections(req: Request) {
-        const { db } = await this.getQuery(req); 
-        return await this.dao.getCollections(db);
+    async getCollections(req: Request, db: string) {
+        const database = await this.getDb(await this.tokenService.getUUID(await this.tokenService.extractTokenFromHeader(req)), db);
+        const collections = await this.dao.getCollections(database);
+        let collectionsNames = [];
+        for(let i = 0; i < collections.length; i++) {
+            collectionsNames.push(collections[i].name);
+        }
+        return collectionsNames;
     }
 
     async createCollection(req: Request) {
@@ -62,7 +67,7 @@ export class MongoService {
         const token = await this.tokenService.extractTokenFromHeader(req);
         const uuid = await this.tokenService.getUUID(token);
         
-        const mongoReq: MongoRequest = req.body;
+        const mongoReq: DbRequest = req.body;
 
         const db = await this.getDb(uuid, mongoReq.database);
 

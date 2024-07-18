@@ -1,4 +1,4 @@
-export class SqlRequest {
+export class DbRequest {
     database: string;
     table: string;
     data: object;

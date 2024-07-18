@@ -3,8 +3,9 @@ import { Request } from 'express';
 import { DbDataService } from 'src/db-data/db-data.service';
 import { Db, DbData } from 'src/db-data/entity/db-data.entity';
 import { TokenService } from 'src/token/token.service';
-import { SqlRequest } from 'src/db-requests/sqlRequest';
 import { MysqlDAO } from './mysql.dao';
+import { DbRequest } from 'src/db-requests/dbRequest';
+import { RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class MysqlService {
@@ -19,7 +20,7 @@ export class MysqlService {
             await this.tokenService.extractTokenFromHeader(req)
         );
         const data = req.body;
-        if(data["connection_string"]) {
+        if(data["connection_string"] && !data["connection_data"]) {
             const vals = data["connection_string"].split("/");
 
             const [ userData, hostData ] = vals[2].split("@");
@@ -63,14 +64,23 @@ export class MysqlService {
         return await this.dao.custom(db, sqlReq);
     }
 
-    async getTables(req: Request) {
-        const { db, sqlReq } = await this.getQuery(req);
-        return await this.dao.getTables(db, sqlReq);
+    async getTables(req: Request, db: string) {
+        const database = await this.getDb(await this.tokenService.getUUID(await this.tokenService.extractTokenFromHeader(req)), db);
+        const tables = await this.dao.getTables(database, db);
+        let tableNames = [];
+
+        if(Array.isArray(tables)) {
+            for(let i = 0; i < tables.length; i++) {
+                tableNames.push((tables[i] as RowDataPacket).table_name);
+            }
+        }
+        
+        return tableNames;
     }
 
     private async getQuery(req: Request) {
         const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
+        const sqlReq: DbRequest = req.body;
         const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
 
         return { db, sqlReq };

@@ -8,7 +8,8 @@ import {
     Delete,
     Req,
     UseGuards,
-    UseInterceptors
+    UseInterceptors,
+    Query,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
@@ -58,21 +59,21 @@ export class MongoController {
     @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Get('collection')
-    async getCollections(@Req() req: Request) {
-        return await this.service.getCollections(req);
+    @Get('tables')
+    async getCollections(@Req() req: Request, @Query('database') db: string) {
+        return await this.service.getCollections(req, db);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post('collection')
+    @Post('tables')
     async createCollection(@Req() req: Request) {
         await this.service.createCollection(req);
     }
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Delete('collection')
+    @Delete('tables')
     async dropCollection(@Req() req: Request) {
         await this.service.dropCollection(req);
     }

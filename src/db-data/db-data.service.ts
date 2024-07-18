@@ -13,7 +13,6 @@ export class DbDataService {
     async save(uuid: string, data: object, db: Db) {
         const dbData = new DbData();
 
-        dbData.id = await this.dbDataRepo.count() + 1;
         dbData.userId = uuid;
         dbData.data = data;
         dbData.db = db;
@@ -31,6 +30,8 @@ export class DbDataService {
         if(found) {
             throw new ConflictException("database with the same name already exists");
         }
+
+        console.log(dbData);
 
         await dbData.save();
     }

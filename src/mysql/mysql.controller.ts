@@ -9,6 +9,7 @@ import {
     Req,
     UseGuards,
     UseInterceptors,
+    Query,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
@@ -64,8 +65,8 @@ export class MysqlController {
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post("tables")
-    async getTables(@Req() req: Request) {
-        return await this.service.getTables(req);
+    @Get("tables")
+    async getTables(@Req() req: Request, @Query("database") db: string) {
+        return await this.service.getTables(req, db);
     }
 }

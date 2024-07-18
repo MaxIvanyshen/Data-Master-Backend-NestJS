@@ -4,7 +4,7 @@ import { DbDataService } from 'src/db-data/db-data.service';
 import { Db, DbData } from 'src/db-data/entity/db-data.entity';
 import { TokenService } from 'src/token/token.service';
 import { PostgresDAO } from './postgres.dao';
-import { SqlRequest } from 'src/db-requests/sqlRequest';
+import { DbRequest } from 'src/db-requests/dbRequest';
 
 @Injectable()
 export class PostgresService {
@@ -54,7 +54,7 @@ export class PostgresService {
 
     private async getQuery(req: Request) {
         const token = await this.tokenService.extractTokenFromHeader(req);
-        const sqlReq: SqlRequest = req.body;
+        const sqlReq: DbRequest = req.body;
         const db = await this.getDb(await this.tokenService.getUUID(token), sqlReq.database);
 
         return { db, sqlReq };

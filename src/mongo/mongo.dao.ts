@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { MongoClient } from 'mongodb';
 import { DbData } from 'src/db-data/entity/db-data.entity';
-import { MongoRequest } from 'src/db-requests/mongoRequest';
+import { DbRequest } from 'src/db-requests/dbRequest';
 
 export class MongoDAO {
 
@@ -23,7 +23,7 @@ export class MongoDAO {
         this.client = new MongoClient(uri);
         try {
             await this.client.connect();
-            this.database = this.client.db(db.data["connection_data"]["database"]);
+            this.database = await this.client.db(db.data["connection_data"]["database"]);
         } catch(e) {
             throw new InternalServerErrorException("couldn't connect to database");
         }
@@ -37,31 +37,31 @@ export class MongoDAO {
         }
     }
 
-    async select(db: DbData, req: MongoRequest): Promise<object[]> {
+    async select(db: DbData, req: DbRequest): Promise<object[]> {
         await this.connectToDB(db);
-        const collection = await this.database.collection(req.collection);
+        const collection = await this.database.collection(req.table);
         const found: object[] = await collection.find(req.data["query"]).toArray();
         await this.disconnect();
         return found
     }
 
-    async insert(db: DbData, req: MongoRequest) {
+    async insert(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
-        const collection = await this.database.collection(req.collection);
+        const collection = await this.database.collection(req.table);
         await collection.insertOne(req.data["values"]);
         await this.disconnect();
     }
 
-    async update(db: DbData, req: MongoRequest) {
+    async update(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
-        const collection = await this.database.collection(req.collection);
+        const collection = await this.database.collection(req.table);
         await collection.updateMany(req.data["query"], { $set: req.data["values"] });
         await this.disconnect();
     }
 
-    async delete(db: DbData, req: MongoRequest) {
+    async delete(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
-        const collection = await this.database.collection(req.collection);
+        const collection = await this.database.collection(req.table);
         await collection.deleteMany(req.data["query"]);
         await this.disconnect();
     }
@@ -73,15 +73,15 @@ export class MongoDAO {
         return collections;
     }
 
-    async createCollection(db: DbData, req: MongoRequest) {
+    async createCollection(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
-        await this.database.createCollection(req.collection);
+        await this.database.createCollection(req.table);
         await this.disconnect();
     }
 
-    async dropCollection(db: DbData, req: MongoRequest) {
+    async dropCollection(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
-        await this.database.dropCollection(req.collection);
+        await this.database.dropCollection(req.table);
         await this.disconnect();
     }
 }

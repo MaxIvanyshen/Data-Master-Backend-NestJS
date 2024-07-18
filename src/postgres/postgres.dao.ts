@@ -1,9 +1,8 @@
-import { Client, Pool } from 'pg';
+import { Pool } from 'pg';
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { InternalServerErrorException } from '@nestjs/common';
-import { SqlRequest } from 'src/db-requests/sqlRequest';
-import { table } from 'console';
+import { DbRequest } from 'src/db-requests/dbRequest';
 
 export class PostgresDAO {
     public readonly OK = 0;
@@ -19,21 +18,21 @@ export class PostgresDAO {
         }
     }
 
-    public async insert(db: DbData, req: SqlRequest) {
+    public async insert(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
         this.client.release();
     }
 
-    public async select(db: DbData, req: SqlRequest): Promise<object> {
+    public async select(db: DbData, req: DbRequest): Promise<object> {
         await this.connectToDB(db);
         let queryStr = SqlQueryConstructor.makeSelectionQueryStr(req.data, req.table);
         const result = await this.client.query(queryStr);
         return result.rows;
     }
 
-    public async update(db: DbData, req: SqlRequest) {
+    public async update(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeUpdateQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
@@ -41,14 +40,14 @@ export class PostgresDAO {
     }
 
 
-    public async delete(db: DbData, req: SqlRequest) {
+    public async delete(db: DbData, req: DbRequest) {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeDeletionQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
         this.client.release();
     }
 
-    public async custom(db: DbData, req: SqlRequest): Promise<object> {
+    public async custom(db: DbData, req: DbRequest): Promise<object> {
         await this.connectToDB(db);
         const result = await this.client.query(req.data["query"])
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
@@ -56,7 +55,7 @@ export class PostgresDAO {
         return result.rows;
     }
 
-    public async getTables(db: DbData, req: SqlRequest): Promise<object> {
+    public async getTables(db: DbData, req: DbRequest): Promise<object> {
         await this.connectToDB(db);
         const result = await this.client.query(`SELECT table_name
                     FROM information_schema.tables
