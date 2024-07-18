@@ -1,4 +1,4 @@
-import { Client } from 'pg';
+import { Client, Pool } from 'pg';
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
 import { DbData } from 'src/db-data/entity/db-data.entity';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -11,38 +11,25 @@ export class PostgresDAO {
 
     private client: any = null;
 
-    public async connectToDB(dbData: DbData): Promise<number> {
+    public async connectToDB(dbData: DbData) {
         if(dbData.data["connection_string"]) {
-            this.client = new Client({ connectionString: dbData.data["connection_string"] });
+            this.client = await new Pool({ connectionString: dbData.data["connection_string"] }).connect();
         } else {
-            this.client = new Client(dbData.data["connection_data"]);
+            this.client = await new Pool(dbData.data["connection_data"]).connect();
         }
-        let status: number = 0;
-        this.client.connect((err: any) => {
-            if (err) {
-                throw new InternalServerErrorException("couldn't connect to database");
-            };
-        });
-        return status;
-    }
-
-    private async disconnect() {
-        this.client.end()
-            .catch(() => { throw new InternalServerErrorException("couln't close the connection"); });
     }
 
     public async insert(db: DbData, req: SqlRequest) {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
-        this.disconnect();
+        this.client.release();
     }
 
     public async select(db: DbData, req: SqlRequest): Promise<object> {
         await this.connectToDB(db);
         let queryStr = SqlQueryConstructor.makeSelectionQueryStr(req.data, req.table);
         const result = await this.client.query(queryStr);
-        this.disconnect();
         return result.rows;
     }
 
@@ -50,7 +37,7 @@ export class PostgresDAO {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeUpdateQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
-        this.disconnect();
+        this.client.release();
     }
 
 
@@ -58,14 +45,14 @@ export class PostgresDAO {
         await this.connectToDB(db);
         await this.client.query(SqlQueryConstructor.makeDeletionQueryStr(req.data, req.table))
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
-        this.disconnect();
+        this.client.release();
     }
 
     public async custom(db: DbData, req: SqlRequest): Promise<object> {
         await this.connectToDB(db);
         const result = await this.client.query(req.data["query"])
             .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
-        this.disconnect();
+        this.client.release();
         return result.rows;
     }
 
@@ -76,7 +63,7 @@ export class PostgresDAO {
                     WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
                     AND table_type = 'BASE TABLE';`)
             .catch(() => { throw new InternalServerErrorException("couldn't select from the database"); });
-        this.disconnect();
+        this.client.release();
         let tableNames = []
         for(let i = 0; i < result.rows.length; i++) {
             tableNames.push(result.rows[i].table_name);
