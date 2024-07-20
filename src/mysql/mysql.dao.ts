@@ -1,6 +1,6 @@
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
 import { DbData } from 'src/db-data/entity/db-data.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import * as mysql from "mysql2/promise";
 import { DbRequest } from "src/db-requests/dbRequest";
 
@@ -64,7 +64,7 @@ export class MysqlDAO {
             const [results, ] = await pool.execute(req.data["query"]);
             return results;
         } catch(err: any) {
-            throw new InternalServerErrorException("couldn't update database");
+            throw new BadRequestException("invalid query");
         } finally {
             pool.end();
         }

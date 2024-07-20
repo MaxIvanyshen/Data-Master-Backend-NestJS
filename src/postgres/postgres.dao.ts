@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import { SqlQueryConstructor } from "../sqlTools/sqlQueryConstructor";
 import { DbData } from 'src/db-data/entity/db-data.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { DbRequest } from 'src/db-requests/dbRequest';
 
 export class PostgresDAO {
@@ -50,7 +50,7 @@ export class PostgresDAO {
     public async custom(db: DbData, req: DbRequest): Promise<object> {
         await this.connectToDB(db);
         const result = await this.client.query(req.data["query"])
-            .catch(() => { throw new InternalServerErrorException("couldn't insert into the database"); });
+            .catch(() => { throw new BadRequestException("invalid query"); });
         this.client.release();
         return result.rows;
     }

@@ -31,6 +31,8 @@ export class DbDataService {
             throw new ConflictException("database with the same name already exists");
         }
 
+        console.log(dbData);
+
         await dbData.save();
     }
 

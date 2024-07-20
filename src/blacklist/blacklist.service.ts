@@ -5,7 +5,6 @@ import * as Redis from "redis"
 export class BlacklistService {
     private readonly client
     
-
     constructor() {
         this.client = Redis.createClient({
             password: process.env.REDIS_PASSWORD,
