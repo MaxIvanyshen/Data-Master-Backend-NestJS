@@ -39,6 +39,30 @@ export class MysqlService {
         await this.dbDataService.save(uuid, data, Db.MySQL);
     }
 
+    async editDbData(req: Request) {
+        const uuid = await this.tokenService.getUUID(
+            await this.tokenService.extractTokenFromHeader(req)
+        );
+        const data = req.body;
+        if(data["connection_string"] && !data["connection_data"]) {
+            const vals = data["connection_string"].split("/");
+
+            const [ userData, hostData ] = vals[2].split("@");
+            const [ user, password ] = userData.split(":");
+            const [ host, port ] = hostData.split(":");
+            const dbName = vals[3];
+
+            data["connection_data"] = {
+                "host": host,
+                "port": port,
+                "user": user,
+                "password": password,
+                "database": dbName,
+            }
+        }
+        await this.dbDataService.edit(uuid, data, Db.MySQL);
+    }
+
     async select(req: Request) {
         const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.select(db, sqlReq);

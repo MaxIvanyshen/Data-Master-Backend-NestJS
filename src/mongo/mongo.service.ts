@@ -23,6 +23,14 @@ export class MongoService {
         await this.dbDataService.save(uuid, data, Db.MongoDB);
     }
 
+    async editDbData(req: Request) {
+        const uuid = await this.tokenService.getUUID(
+            await this.tokenService.extractTokenFromHeader(req)
+        );
+        const data = req.body;
+        await this.dbDataService.edit(uuid, data, Db.MongoDB);
+    }
+
     async select(req: Request) {
         const { db, mongoReq } = await this.getQuery(req);
         return await this.dao.select(db, mongoReq);

@@ -22,6 +22,14 @@ export class PostgresService {
         await this.dbDataService.save(uuid, data, Db.PostgreSQL);
     }
 
+    async editDbData(req: Request) {
+        const uuid = await this.tokenService.getUUID(
+            await this.tokenService.extractTokenFromHeader(req)
+        );
+        const data = req.body;
+        await this.dbDataService.edit(uuid, data, Db.PostgreSQL);
+    }
+
     async select(req: Request) {
         const { db, sqlReq } = await this.getQuery(req);
         return await this.dao.select(db, sqlReq);

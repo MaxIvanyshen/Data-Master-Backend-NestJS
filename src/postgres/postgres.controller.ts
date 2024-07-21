@@ -10,6 +10,7 @@ import {
     UseGuards,
     UseInterceptors,
     Query,
+    Put,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
@@ -22,9 +23,16 @@ export class PostgresController {
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post('add-data')
+    @Post('data')
     async addData(@Req() req: Request) {
         await this.service.saveDbData(req);
+    }
+
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Put('data')
+    async editData(@Req() req: Request) {
+        await this.service.editDbData(req);
     }
 
     @UseInterceptors(CacheInterceptor)
