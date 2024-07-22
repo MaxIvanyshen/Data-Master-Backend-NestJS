@@ -23,7 +23,7 @@ export class MysqlController {
 
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post('add-data')
+    @Post('data')
     async addData(@Req() req: Request) {
         await this.service.saveDbData(req);
     }
@@ -33,6 +33,13 @@ export class MysqlController {
     @Put('data')
     async editData(@Req() req: Request) {
         await this.service.editDbData(req);
+    }
+
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Get('stats')
+    async getStats(@Query('database') database: string, @Req() req: Request) {
+        return await this.service.getStats(database, req);
     }
 
 

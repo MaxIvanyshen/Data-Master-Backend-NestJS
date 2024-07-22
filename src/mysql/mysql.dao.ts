@@ -83,4 +83,81 @@ export class MysqlDAO {
             pool.end();
         }
     }
+
+    public async getOperationsCount(db: DbData) {
+        const pool = await this.connectToDB(db);
+        try {
+            const [result, ] = await pool.execute(`
+                SELECT VARIABLE_NAME, VARIABLE_VALUE
+                FROM information_schema.GLOBAL_STATUS
+                WHERE VARIABLE_NAME IN ('Com_insert', 'Com_update', 'Com_delete', 'Com_select')
+
+                UNION ALL
+
+                SELECT 'COM_OTHER' AS VARIABLE_NAME,
+                       SUM(VARIABLE_VALUE) AS VARIABLE_VALUE
+                FROM information_schema.GLOBAL_STATUS
+                WHERE VARIABLE_NAME LIKE 'Com_%'
+                AND VARIABLE_NAME NOT IN ('Com_insert', 'Com_update', 'Com_delete', 'Com_select');
+                                                   `);
+            return result;
+        } catch(err: any) {
+            throw new InternalServerErrorException("couldn't update database");
+        } finally {
+            pool.end();
+        }
+    }
+
+    public async getActiveConnections(db: DbData) {
+        const pool = await this.connectToDB(db);
+        try {
+            const [result, ] = await pool.execute(`
+
+                SELECT COUNT(*) AS active_connections
+                FROM information_schema.PROCESSLIST
+                WHERE COMMAND != 'Sleep';
+                                                   `);
+            return result[0]["active_connections"];
+        } catch(err: any) {
+            throw new InternalServerErrorException("couldn't update database");
+        } finally {
+            pool.end();
+        }
+    }
+    public async getMemoryUsageData(db: DbData) {
+        const pool = await this.connectToDB(db);
+        try {
+            const [totalDbSizeResult, ] = await pool.execute(`
+                                                             SELECT 
+                                                             'Total Size of Database (bytes)' AS metric,
+                                                             ROUND(SUM(data_length + index_length), 2) AS size_bytes
+                                                             FROM 
+                                                             information_schema.TABLES
+                                                             WHERE 
+                                                             table_schema = '${db.data["connection_data"]["database"]}';
+                                                                  `);
+            const totalDbSize = totalDbSizeResult[0]["size_bytes"];
+
+            const [tableSizeResult, ] = await pool.execute(`
+                                                           SELECT 
+                                                           table_name,
+                                                           ROUND((data_length + index_length), 2) AS table_size_bytes
+                                                           FROM 
+                                                           information_schema.TABLES
+                                                           WHERE 
+                                                           table_schema = '${db.data["connection_data"]["database"]}'
+                                                           ORDER BY 
+                                                           table_size_bytes DESC;
+                                                           `);
+            const tablesSize = tableSizeResult;
+            return {
+                totalDbSize,
+                tablesSize
+            }
+        } catch(err: any) {
+            throw new InternalServerErrorException("couldn't update database");
+        } finally {
+            pool.end();
+        }
+    }
 }

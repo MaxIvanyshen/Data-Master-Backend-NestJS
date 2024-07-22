@@ -127,4 +127,42 @@ export class MysqlService {
 
         return found;
     }
+
+    async getStats(database: string, req: Request) {
+        const db = await this.getDb(await this.tokenService.getUUID(await this.tokenService.extractTokenFromHeader(req)), database);
+
+        const memoryUsage = await this.convertMemoryUsage(await this.dao.getMemoryUsageData(db));
+        const activeConnections = await this.dao.getActiveConnections(db);
+        const operations = await this.convertOperationsCount(await this.dao.getOperationsCount(db));
+
+        return {
+            memoryUsage,
+            activeConnections,
+            operations
+        }
+    }
+
+    private async convertOperationsCount(operationsCount: any) {
+        const result = {}     
+        let total = 0;
+        operationsCount.forEach((operation: object) => {
+            result[operation["VARIABLE_NAME"].substring(4).toLowerCase()] = Number(operation["VARIABLE_VALUE"]);
+            total += Number(operation["VARIABLE_VALUE"]);
+        });
+        result["total"] = total;
+        return result;
+    }
+
+    private async convertMemoryUsage(memoryUsageStats: any) {
+        const result = {
+            databaseTotal: Number(memoryUsageStats["totalDbSize"]),
+            tables: {},
+        }
+
+        memoryUsageStats["tablesSize"].forEach((table: object) => {
+            result.tables[table["table_name"]] = Number(table["table_size_bytes"]);
+        });
+            
+        return result;
+    }
 }
