@@ -85,4 +85,44 @@ export class PostgresService {
 
         return found;
     }
+
+    async getStats(database: string, req: Request) {
+        const db = await this.getDb(await this.tokenService.getUUID(await this.tokenService.extractTokenFromHeader(req)), database);
+
+        const memoryUsage = await this.convertMemoryUsage(await this.dao.getMemoryUsageData(db));
+        const activeConnections = Number(await this.dao.getActiveConnections(db));
+        const operations = await this.convertOperationsCounts(await this.dao.getOperationsCount(db));
+
+        return {
+            memoryUsage,
+            activeConnections,
+            operations
+        }
+    }
+
+    private async convertOperationsCounts(countRow: object) {
+        let result = {};
+        let total = 0;
+        Object.entries(countRow).map(([key, value]) => {
+            result[key.substring(0, key.indexOf('_'))] = Number(value);
+            total += Number(value);
+        });
+        result["total"] = total;
+        return result;
+    }
+
+    private async convertMemoryUsage(memoryUsage: object) {
+        const newTables = {};
+
+        memoryUsage["tables"].forEach((table: object) => {
+            const bytes = Number(table["size"].split(/\s+/)[0]) * 1024;
+            newTables[table["table_name"]] = bytes;
+        })
+
+        return {
+            databaseTotal: Number(memoryUsage["databaseTotal"].split(/\s+/)[0]) * 1024,
+            tables: newTables,
+        };
+    }
 }
+    

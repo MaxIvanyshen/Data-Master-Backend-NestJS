@@ -69,4 +69,61 @@ export class PostgresDAO {
         }
         return tableNames;
     }
+
+    public async getOperationsCount(db: DbData) {
+        await this.connectToDB(db)
+        const result = await this.client.query(`
+                                               SELECT
+                                                   SUM(CASE WHEN query LIKE 'SELECT%' THEN calls ELSE 0 END) AS select_count,
+                                                   SUM(CASE WHEN query LIKE 'INSERT%' THEN calls ELSE 0 END) AS insert_count,
+                                                   SUM(CASE WHEN query LIKE 'UPDATE%' THEN calls ELSE 0 END) AS update_count,
+                                                   SUM(CASE WHEN query LIKE 'DELETE%' THEN calls ELSE 0 END) AS delete_count,
+                                                   SUM(CASE WHEN query NOT LIKE 'SELECT%' AND query NOT LIKE 'INSERT%' AND query NOT LIKE 'UPDATE%' AND query NOT LIKE 'DELETE%' THEN calls ELSE 0 END) AS other_count
+                                               FROM
+                                                   pg_stat_statements;
+                                               `)
+            .catch(() => { throw new InternalServerErrorException("can't parse database statistics") });
+        this.client.release();
+        return result.rows[0];
+    }
+
+    public async getActiveConnections(db: DbData) {
+        await this.connectToDB(db)
+        const result = await this.client.query(`SELECT COUNT(*)
+            FROM pg_stat_activity WHERE datname = '${db.data["connection_data"]["database"]}';`)
+            .catch(() => { throw new InternalServerErrorException("can't parse database statistics") });
+        this.client.release();
+        return result.rows[0].count;
+    }
+
+    public async getMemoryUsageData(db: DbData) {
+        await this.connectToDB(db)
+        let result = await this.client.query(`
+                   SELECT pg_size_pretty(pg_database_size('${db.data["connection_data"]["database"]}')) AS database_size;`)
+            .catch(() => { throw new InternalServerErrorException("can't parse database statistics") });
+        const totalDbSize = result.rows[0].database_size;
+        result = await this.client.query(`
+                                         SELECT
+                                         table_name,
+                                         pg_size_pretty(total_size) AS size
+                                         FROM (
+                                             SELECT
+                                             c.relname AS table_name,
+                                             pg_total_relation_size(c.oid) AS total_size
+                                             FROM
+                                             pg_class c
+                                             LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+                                             WHERE
+                                             c.relkind = 'r' -- Only tables
+                                             AND n.nspname NOT IN ('pg_catalog', 'information_schema') -- Exclude system schemas
+                                         ) 
+                                         ORDER BY total_size DESC;`)
+            .catch(() => { throw new InternalServerErrorException("can't parse database statistics") });
+        const tablesSize = result.rows;
+        this.client.release();
+        return {
+            databaseTotal: totalDbSize,
+            tables: tablesSize,
+        }
+    }
 }
