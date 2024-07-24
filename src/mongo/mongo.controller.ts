@@ -35,6 +35,13 @@ export class MongoController {
         await this.service.editDbData(req);
     }
 
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Get('stats')
+    async getStats(@Query('database') database: string, @Req() req: Request) {
+        return await this.service.getStats(database, req);
+    }
+
     @UseInterceptors(CacheInterceptor)
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.OK)

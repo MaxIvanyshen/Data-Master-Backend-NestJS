@@ -4,7 +4,6 @@ import { DbData } from 'src/db-data/entity/db-data.entity';
 import { DbRequest } from 'src/db-requests/dbRequest';
 
 export class MongoDAO {
-
     private client: any
     private database: any
 
@@ -83,5 +82,39 @@ export class MongoDAO {
         await this.connectToDB(db);
         await this.database.dropCollection(req.table);
         await this.disconnect();
+    }
+
+    async getOperationsCount(db: DbData) {
+        await this.connectToDB(db);
+        const adminDb = this.client.db().admin();
+        const serverStatus = await adminDb.command({ serverStatus: 1 });
+        const operationsCount = serverStatus.opcounters;
+        await this.disconnect();
+
+        return operationsCount;
+    }
+
+    async getActiveConnections(db: DbData) {
+        await this.connectToDB(db);
+        const adminDb = this.client.db().admin();
+        const serverStatus = await adminDb.command({ serverStatus: 1 });
+        await this.disconnect();
+        return serverStatus.connections.current;
+    }
+
+    async getMemoryUsageData(db: DbData) {
+        const collections = await this.getCollections(db);
+        await this.connectToDB(db);
+        const databaseTotal = (await this.database.stats()).dataSize;
+        const collectionsSize = {};
+        await collections.forEach(async (collection: any) => {
+            const stats = await this.database.command({ collStats: collection.name });
+            collectionsSize[collection.name] = stats.size;
+        });
+
+        return {
+            databaseTotal,
+            collections: collectionsSize
+        }
     }
 }
